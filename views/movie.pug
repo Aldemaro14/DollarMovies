@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1= movie.title
+  br
+  p= movie.body
+  br
+  p= movie.genre
+  hr
+  a.btn.btn-default(href='/movies/edit/' + movie._id) Edit
+  a.btn.btn-danger.delete-mov(href='#', data-id=movie._id) Delete

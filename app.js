@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
+//const flash = require('connect-flash');
+const session = require('express-session');
 
 //connect to database
 mongoose.connect('mongodb+srv://super2:Password.123@cluster0-l4pwh.gcp.mongodb.net/test?retryWrites=true&w=majority', 
@@ -26,7 +29,6 @@ const app = express();
 
 //Bring the models
 let User = require('./models/user.model');
-let Movie = require('./models/movie.model');
 
 //Load View Engine
 app.set('views', path.join(__dirname, 'views'));
@@ -41,6 +43,38 @@ app.use(bodyParser.json());
 //Set public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+//Express Session Middleware
+app.use(session({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true
+}));
+
+//Express Messages Middleware
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
+//Express Validator Middleware
+app.use(expressValidator({
+    errorFormatter: function(param, msg, value) {
+        var namespace = param.split('.')
+        , root = namespace.shift()
+        , formParam = root;
+
+        while(namespace.length){
+            formParam += '[' + namespace.shift() + ']';
+        }
+        return {
+            param : formParam,
+            msg : msg,
+            value : value
+        }
+    }
+}));
+
 //Home Route
 app.get('/', (req, res) => {
     res.render('index', {
@@ -48,85 +82,12 @@ app.get('/', (req, res) => {
     });
 });
 
-//Movies Route
-app.get('/movies', (req, res) => {
-    Movie.find({}, (err, movies) => {
-        if(err){
-            console.log(err);
-        } else {
-            res.render('movies', {
-                title: 'title',
-                movies: movies 
-            });
-        }
-    });  
-});
+//Route files
+let movies = require('./routes/movies');
+let users = require('./routes/users')
+app.use('/movies', movies);
+app.use('/users', users);
 
-//Add Movies Route
-app.get('/movies/add', (req, res) => {
-    res.render('addMovie', {
-        title: 'Add Movie',
-    });
-});
-
-//Add Submit POST Route
-app.post('/movies/add', (req, res) => {
-    let movie = new Movie();
-    movie.title = req.body.title;
-    movie.genre = req.body.genre;
-    movie.body = req.body.body;
-
-    movie.save((err) => {
-        if(err){
-            console.log(err);
-            return;
-        } else {
-            res.redirect('/movies');
-        }
-    })
-})
-
-
-//Users Route
-app.get('/user', (req, res) => {
-    User.find({}, (err, user) => {
-        if(err){
-            console.log(err);
-        } else {
-            res.render('user', {
-                title: 'Profile',
-                profile: user 
-            });
-        }
-    });  
-});
-
-//Add User Route
-app.get('/user/add', (req, res) => {
-    res.render('addUser', {
-        title: 'Create User',
-    });
-});
-
-//CreateUser Submit POST Route
-app.post('/user/add', (req, res) => {
-    console.log(req.body);
-    console.log(req.body.firstName);
-    let user = new User();
-    user.firstName = req.body.firstName;
-    user.lastName = req.body.lastName;
-    user.email = req.body.email;
-    user.isAdmin = req.body.isAdmin;
-
-    user.save((err) => {
-        if(err){
-            console.log(err);
-            return;
-        } else {
-            res.redirect('/user');
-        }
-    });
-});
 
 //Start Server
 app.listen(3000, () => {

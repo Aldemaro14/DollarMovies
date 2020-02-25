@@ -2,6 +2,14 @@ extends layout
 
 block content
   h1 #{title}
-  ul
-    each movie in movies
-      li= movie.title
+    .row
+      each movie in movies
+        .col-sm-6.col-md-4
+          .thumbnail
+            img(src='...', alt='...')
+            .caption
+              a(href='/movies/' + movie._id)= movie.title
+              p= movie.body
+              p
+                a.btn.btn-primary(href='#', role='button') Buy now!
+                a.btn.btn-default(href='#', role='button') Rent

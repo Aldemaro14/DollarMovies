@@ -3,6 +3,7 @@ html
   head
     title DollarMovie
     link(rel='stylesheet' href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/css/style.css')
   body
     nav.navbar.navbar-inverse
       .container-fluid
@@ -23,17 +24,18 @@ html
             button.btn.btn-default(type='submit') Submit
           ul.nav.navbar-nav.navbar-right
             li.active
-              a(href='#')
+              a(href='/user')
                 | Profile 
                 span.sr-only (current)
             li
-              a(href='#') Store
+              a(href='/movies') Store
         // /.navbar-collapse
         // /.container-fluid
-
-
-    
     .container
+      != messages('message', locals)
+      if errors
+        each error, i in errors
+          div(class="alert alert-danger") #{error.msg}
       block content
       br
       hr
@@ -41,3 +43,4 @@ html
         p Copyright &copy; 2020
     script(src='/bower_components/jquery/dist/jquery.js')
     script(src='/bower_components/bootstrap/dist/js/bootstrap.js')
+    script(src='/js/main.js')
