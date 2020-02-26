@@ -2,15 +2,23 @@ const express = require('express');
 const router = express.Router();
 let User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
+
+//Register Form
+router.get('/register', (req, res) => {
+    res.render('register');
+})
 
 //Register process
 router.post('/register', (req, res) => {
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const email = req.body.email;
-    const userName = req.body.userName;
+    const username = req.body.username;
     const password = req.body.password;
     const password2 = req.body.password2;
+
+    console.log(username);
 
     req.checkBody('email', 'Email is required').notEmpty();
     req.checkBody('email', 'Email is not valid').isEmail();
@@ -19,18 +27,20 @@ router.post('/register', (req, res) => {
     req.checkBody('password2', 'Password2 is required').notEmpty();
     req.checkBody('password', 'Passwords do not match').equals(req.body.password);
 
-    let errors = req.validationErrors();
+    let err = req.validationErrors();
 
     if(err){
         res.render('register', {
-            errors:errors
+            errors:err
         });
     } else {
+
+        console.log('db')
         let newUser = new User({
             firstName : firstName,
             lastName : lastName,
             email : email,
-            userName : userName,
+            username : username,
             password : password
         });
 
@@ -45,7 +55,7 @@ router.post('/register', (req, res) => {
                         console.log(err);
                         return;
                     } else {
-                        req.flash('success', 'You are now registered and can now log in');
+                        req.flash('success', 'You are now registered and can log in');
                         res.redirect('/users/login');
                     }
                 });
@@ -54,13 +64,25 @@ router.post('/register', (req, res) => {
     }
 });
 
-//Register Form
-router.get('/register', (req, res) => {
-    res.render('register');
-})
-
+//Login Form
 router.get('/login',  (req, res) =>{
     res.render('login');
 });
+
+//Login Process
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
+})
+
+//Logout
+router.get('/logout', (req, res) => {
+    req.logout();
+    req.flash('success', 'You are logged out');
+    res.redirect('/users/login');
+})
 
 module.exports = router;

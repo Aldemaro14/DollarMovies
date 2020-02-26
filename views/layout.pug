@@ -18,17 +18,27 @@ html
         // Collect the nav links, forms, and other content for toggling
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
           ul.nav.navbar-nav
-          form.navbar-form.navbar-left
-            .form-group
-              input.form-control(type='text', placeholder='Search')
-            button.btn.btn-default(type='submit') Submit
-          ul.nav.navbar-nav.navbar-right
             li.active
               a(href='/user')
                 | Profile 
                 span.sr-only (current)
             li
               a(href='/movies') Store
+          form.navbar-form.navbar-left
+            .form-group
+              input.form-control(type='text', placeholder='Search')
+            button.btn.btn-default(type='submit') Submit
+          ul.nav.navbar-nav.navbar-right
+            if user
+              li 
+                a(href='/users/logout') Logout
+            else
+              li
+                a(href='/users/register')
+                  | register 
+                  span.sr-only (current)
+              li
+                a(href='/users/login') Login
         // /.navbar-collapse
         // /.container-fluid
     .container

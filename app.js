@@ -3,12 +3,13 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
-//const flash = require('connect-flash');
+const flash = require('connect-flash');
 const session = require('express-session');
+const passport = require('passport');
+const config = require('./config/database');
 
 //connect to database
-mongoose.connect('mongodb+srv://super2:Password.123@cluster0-l4pwh.gcp.mongodb.net/test?retryWrites=true&w=majority', 
-{ 
+mongoose.connect(config.database, { 
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -71,9 +72,20 @@ app.use(expressValidator({
             param : formParam,
             msg : msg,
             value : value
-        }
+        };
     }
 }));
+
+//Passport Config
+require('./config/passport')(passport);
+//Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('*', (req, res, next) => {
+    res.locals.user = req.user || null
+    next();
+})
 
 //Home Route
 app.get('/', (req, res) => {
